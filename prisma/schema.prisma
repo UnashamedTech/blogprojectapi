@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  OWNER
+  USER
+}
+
+enum GenderType {
+  MALE
+  FEMALE
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  password String
+  imageUrl String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  RoleUser RoleUser[]
+  blogs    Blog[] // Opposite relation for Blog.userId
+  likes    Like[] // Opposite relation for Like.userId
+  comments Comment[] // Opposite relation for Comment.userId
+}
+
+model RoleUser {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+  Role Role @relation(fields: [roleId], references: [id])
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String
+  isDefault Boolean  @default(false)
+  type      RoleType
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  RoleUser RoleUser[]
+}
+
+model Blog {
+  id       String    @id @default(uuid())
+  title    String
+  content  String
+  userId   String
+  comments Comment[]
+  likes    Like[] // Many-to-many relationship with User via Like model
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id       String    @id @default(uuid())
+  content  String
+  blogId   String
+  userId   String // Add this line
+  parentId String? // For nested comments
+  replies  Comment[] @relation("CommentReplies")
+  likes    Like[] // Many-to-many relationship with User via Like model
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  Blog   Blog     @relation(fields: [blogId], references: [id])
+  parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  User   User     @relation(fields: [userId], references: [id]) // Add this line
+}
+
+
+model Like {
+  id        String  @id @default(uuid())
+  userId    String
+  blogId    String?
+  commentId String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  User    User     @relation(fields: [userId], references: [id])
+  Blog    Blog?    @relation(fields: [blogId], references: [id])
+  Comment Comment? @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, blogId]) // Ensures a user can like a blog only once
+  @@unique([userId, commentId]) // Ensures a user can like a comment only once
+}
