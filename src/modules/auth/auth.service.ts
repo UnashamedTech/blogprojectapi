@@ -64,7 +64,7 @@ export class AuthService {
     return this.prisma.$transaction(async (tx) => {
       const role = await tx.role.findFirst({
         where: {
-          type: RoleType.OWNER,
+          type: RoleType.USER,
           isDefault: true,
         },
       });
@@ -84,7 +84,7 @@ export class AuthService {
           email,
           imageUrl,
           password: hashedPassword,
-          AccountUser: {
+          RoleUser: {
             create: {
               roleId: role.id,
             },
