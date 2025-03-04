@@ -22,7 +22,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
-  @Get('google-sign-in/callback')
+  @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${req.user}`);
