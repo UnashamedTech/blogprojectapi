@@ -25,19 +25,29 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { name, emails, photos } = profile;
+
     try {
       const user = await this.authService.signInOrUp({
         email: emails[0].value,
         name: name.givenName,
         password: emails[0].value,
-        imageUrl: photos[0].value,
+        imageUrl: photos[0]?.value || null,
       });
+
+      if (!user) {
+        return done(new Error('User could not be authenticated'), false);
+      }
+
+      const userWithRoles = await this.authService.getUserWithRoles(user.id);
+
+      const roles = userWithRoles.RoleUser.map((ru) => ru.Role.type);
 
       // Prepare JWT payload
       const payload = {
         sub: user.id,
         email: user.email,
         imageUrl: user.imageUrl,
+        roles,
       };
 
       // Generate JWT token
@@ -46,7 +56,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         expiresIn: process.env.JWT_EXPIRATION,
       });
 
-      done(null, token);
+      done(null, { token, user: userWithRoles });
     } catch (error) {
       done(error, false);
     }
