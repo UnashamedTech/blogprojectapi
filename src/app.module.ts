@@ -3,6 +3,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PrismaService } from './modules/prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
     }),
     AuthModule,
+    AdminModule,
   ],
   providers: [PrismaService],
   controllers: [],
