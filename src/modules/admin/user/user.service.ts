@@ -1,0 +1,67 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
+
+@Injectable()
+export class UserService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAllUsers() {
+    return this.prisma.user.findMany({
+      include: {
+        RoleUser: {
+          include: {
+            Role: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        RoleUser: {
+          include: {
+            Role: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({ where: { id } });
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+  }
+
+  async remove(id: string) {
+    const existingUser = await this.prisma.user.findUnique({ where: { id } });
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    await this.prisma.comment.deleteMany({ where: { userId: id } });
+
+    await this.prisma.like.deleteMany({ where: { userId: id } });
+
+    await this.prisma.roleUser.deleteMany({ where: { userId: id } });
+
+    await this.prisma.blog.deleteMany({ where: { userId: id } });
+
+    return this.prisma.user.delete({ where: { id } });
+  }
+}
