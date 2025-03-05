@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllUsers() {
+  async findAllUsers(paginationDto: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto;
+
     return this.prisma.user.findMany({
+      take: limit,
+      skip: (page - 1) * limit,
       include: {
         RoleUser: {
           include: {
