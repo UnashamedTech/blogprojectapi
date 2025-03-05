@@ -25,7 +25,12 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${req.user}`);
+    const token = req.user?.token;
+    if (!token) {
+      return res.status(400).send('Token not found');
+    }
+
+    res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${token}`);
   }
 
   @Post('sign-in')
