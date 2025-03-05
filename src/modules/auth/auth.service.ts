@@ -19,6 +19,7 @@ export class AuthService {
   async signIn(signInUserDto: SignInUserDto): Promise<AuthDto> {
     const user = await this.prisma.user.findUnique({
       where: { email: signInUserDto.email },
+      include: { RoleUser: { include: { Role: true } } },
     });
 
     if (!user) {
@@ -29,7 +30,16 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
-    const token = await this.jwtService.signAsync(user, {
+    const roles = user.RoleUser.map((ru) => ru.Role.type);
+
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles,
+    };
+
+    const token = await this.jwtService.signAsync(tokenPayload, {
       secret: process.env.JWT_SECRET,
     });
 
@@ -105,5 +115,11 @@ export class AuthService {
       });
     }
     return { userId: email };
+  }
+  async getUserWithRoles(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { RoleUser: { include: { Role: true } } },
+    });
   }
 }
