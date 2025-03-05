@@ -5,12 +5,15 @@ import {
   Get,
   Param,
   Patch,
+  Query,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
 import { Roles } from 'src/modules/auth/auth.decorator';
 import { UserService } from './user.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('admin/user')
 @UseGuards(AuthGuard)
@@ -19,8 +22,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('all')
-  async findAll() {
-    return this.userService.findAllUsers();
+  async findAll(
+    @Query(new ValidationPipe({ transform: true }))
+    paginationDto: PaginationDto,
+  ) {
+    return this.userService.findAllUsers(paginationDto);
   }
 
   @Get('user/:id')
