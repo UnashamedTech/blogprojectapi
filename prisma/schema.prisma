@@ -36,9 +36,9 @@ model User {
   updatedAt DateTime  @updatedAt
 
   RoleUser RoleUser[]
-  blogs    Blog[] // Opposite relation for Blog.userId
-  likes    Like[] // Opposite relation for Like.userId
-  comments Comment[] // Opposite relation for Comment.userId
+  blogs    Blog[]
+  likes    Like[]
+  comments Comment[]
 }
 
 model RoleUser {
@@ -73,7 +73,7 @@ model Blog {
   content  String
   userId   String
   comments Comment[]
-  likes    Like[] // Many-to-many relationship with User via Like model
+  likes    Like[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -86,10 +86,10 @@ model Comment {
   id       String    @id @default(uuid())
   content  String
   blogId   String
-  userId   String // Add this line
-  parentId String? // For nested comments
+  userId   String 
+  parentId String? 
   replies  Comment[] @relation("CommentReplies")
-  likes    Like[] // Many-to-many relationship with User via Like model
+  likes    Like[] 
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -115,6 +115,6 @@ model Like {
   Blog    Blog?    @relation(fields: [blogId], references: [id])
   Comment Comment? @relation(fields: [commentId], references: [id])
 
-  @@unique([userId, blogId]) // Ensures a user can like a blog only once
-  @@unique([userId, commentId]) // Ensures a user can like a comment only once
+  @@unique([userId, blogId]) 
+  @@unique([userId, commentId]) 
 }
