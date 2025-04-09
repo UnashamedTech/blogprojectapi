@@ -13,18 +13,45 @@ async function seedRoles() {
   console.log('Seeding roles...');
   await prisma.role.createMany({
     data: [
-      {
-        name: 'Owner',
-        type: RoleType.OWNER,
-        isDefault: false,
-      },
-      {
-        name: 'User',
-        type: RoleType.USER,
-        isDefault: true,
-      },
+      { name: 'Owner', type: RoleType.OWNER, isDefault: false },
+      { name: 'User', type: RoleType.USER, isDefault: true },
     ],
-    skipDuplicates: true, // Prevent duplicate seeding
+    skipDuplicates: true,
+  });
+}
+
+async function seedCategories() {
+  console.log('Seeding categories...');
+  const categories = [
+    {
+      title: 'Faith',
+      description: 'Posts about faith and spirituality',
+    },
+    {
+      title: 'Fun',
+      description: 'Fun and entertaining posts',
+    },
+    {
+      title: 'Daily Post',
+      description: 'Daily updates and stories',
+    },
+  ];
+
+  await prisma.category.createMany({
+    data: categories,
+  });
+
+  return await prisma.category.findMany();
+}
+
+async function seedInformation() {
+  console.log('Seeding information...');
+  await prisma.information.create({
+    data: {
+      contactEmail: 'abcd@gmail.com',
+      contactPhone: '+251916272791',
+      location: 'Addis Ababa, Ethiopia',
+    },
   });
 }
 
@@ -40,53 +67,65 @@ async function seedUsers() {
 
   const password = await bcrypt.hash('Password123#', 10);
 
-  // Create the Owner (only one)
+  // Create Owner
   const owner = await prisma.user.create({
     data: {
       name: 'Owner User',
       email: 'owner@example.com',
-      password: password,
+      password,
       imageUrl: faker.image.avatar(),
-      RoleUser: {
-        create: {
-          roleId: ownerRole.id,
-        },
-      },
+      roleId: ownerRole.id,
     },
   });
 
-  // Create 9 other Users (Regular Users)
+  // Create Users
   const users = await Promise.all(
-    Array.from({ length: 9 }).map(async () => {
-      return prisma.user.create({
+    Array.from({ length: 9 }).map(() =>
+      prisma.user.create({
         data: {
           name: faker.person.fullName(),
           email: faker.internet.email(),
-          password: password,
+          password,
           imageUrl: faker.image.avatar(),
-          RoleUser: {
-            create: {
-              roleId: userRole.id,
-            },
-          },
+          roleId: userRole.id,
         },
-      });
-    }),
+      }),
+    ),
   );
 
   return { owner, users };
 }
 
-async function seedBlogs(owner) {
+async function seedBlogs(owner: any, categories: any[]) {
   console.log('Seeding blogs...');
 
   const blogs = await Promise.all(
-    Array.from({ length: 5 }).map(async () => {
+    Array.from({ length: 5 }).map(() => {
+      const randomCategory = faker.helpers.arrayElement(categories);
+
       return prisma.blog.create({
         data: {
           title: faker.lorem.sentence(),
-          content: faker.lorem.paragraphs(3),
-          userId: owner.id, // Only the owner can create blogs
+          userId: owner.id,
+          location: faker.location.city(),
+          categoryId: randomCategory.id,
+          heroImages: {
+            1: faker.image.url(),
+            2: faker.image.url(),
+            3: faker.image.url(),
+          },
+          content: {
+            paragraph1: {
+              id: faker.string.uuid(),
+              image: faker.image.url(),
+              content: faker.lorem.paragraph(),
+            },
+            paragraph2: {
+              id: faker.string.uuid(),
+              image: null,
+              content: faker.lorem.paragraph(),
+            },
+          },
         },
       });
     }),
@@ -95,55 +134,45 @@ async function seedBlogs(owner) {
   return blogs;
 }
 
-async function seedComments(users, blogs) {
+async function seedComments(users: any[], blogs: any[]) {
   console.log('Seeding comments...');
 
   const comments = await Promise.all(
     users.flatMap((user) =>
-      blogs.map(async (blog) => {
-        return prisma.comment.create({
+      blogs.map((blog) =>
+        prisma.comment.create({
           data: {
             content: faker.lorem.sentence(),
             blogId: blog.id,
-            userId: user.id, // Users comment on owner's blogs
+            userId: user.id,
           },
-        });
-      }),
+        }),
+      ),
     ),
   );
 
   return comments;
 }
 
-async function seedRepliesAndLikes(owner, comments) {
+async function seedRepliesAndLikes(owner: any, comments: any[]) {
   console.log('Seeding replies and likes...');
 
   await Promise.all(
     comments.map(async (comment) => {
-      // The Owner replies to each user's comment
       await prisma.comment.create({
         data: {
           content: faker.lorem.sentence(),
           blogId: comment.blogId,
-          userId: owner.id, // Owner replies
+          userId: owner.id,
           parentId: comment.id,
         },
       });
 
-      // The Owner likes the user's comment
       await prisma.like.create({
-        data: {
-          userId: owner.id,
-          commentId: comment.id,
-        },
+        data: { userId: owner.id, commentId: comment.id },
       });
-
-      // The User likes the Owner's blog
       await prisma.like.create({
-        data: {
-          userId: comment.userId, // The user who made the comment
-          blogId: comment.blogId,
-        },
+        data: { userId: comment.userId, blogId: comment.blogId },
       });
     }),
   );
@@ -151,8 +180,10 @@ async function seedRepliesAndLikes(owner, comments) {
 
 async function main() {
   await seedRoles();
+  const categories = await seedCategories();
+  await seedInformation();
   const { owner, users } = await seedUsers();
-  const blogs = await seedBlogs(owner);
+  const blogs = await seedBlogs(owner, categories);
   const comments = await seedComments(users, blogs);
   await seedRepliesAndLikes(owner, comments);
 }
