@@ -19,7 +19,7 @@ export class AuthService {
   async signIn(signInUserDto: SignInUserDto): Promise<AuthDto> {
     const user = await this.prisma.user.findUnique({
       where: { email: signInUserDto.email },
-      include: { RoleUser: { include: { Role: true } } },
+      include: { Role: true },
     });
 
     if (!user) {
@@ -30,7 +30,7 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
-    const roles = user.RoleUser.map((ru) => ru.Role.type);
+    const roles = [user.Role.type];
 
     const tokenPayload = {
       id: user.id,
@@ -94,11 +94,7 @@ export class AuthService {
           email,
           imageUrl,
           password: hashedPassword,
-          RoleUser: {
-            create: {
-              roleId: role.id,
-            },
-          },
+          roleId: role.id,
         },
       });
     });
@@ -106,20 +102,34 @@ export class AuthService {
 
   async getUserIfRefreshTokenMatches(email: string) {
     let user = await this.prisma.user.findUnique({
-      where: { email: email },
+      where: { email },
     });
 
     if (!user) {
+      const defaultRole = await this.prisma.role.findFirst({
+        where: { type: RoleType.USER, isDefault: true },
+      });
+
+      if (!defaultRole) {
+        throw new Error('Default user role not found');
+      }
+
       user = await this.prisma.user.create({
-        data: { email: email, name: email, password: '' },
+        data: {
+          email,
+          name: email,
+          password: '',
+          roleId: defaultRole.id, // Add the roleId
+        },
       });
     }
     return { userId: email };
   }
+
   async getUserWithRoles(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
-      include: { RoleUser: { include: { Role: true } } },
+      include: { Role: true },
     });
   }
 }
