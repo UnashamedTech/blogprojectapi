@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateBlogDto {
   @IsNotEmpty()
@@ -8,4 +8,15 @@ export class CreateBlogDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @IsNotEmpty()
+  @IsString()
+  location: string;
+
+  @IsNotEmpty()
+  @IsString()
+  categoryId: string;
+
+  @IsOptional()
+  heroImages?: JSON;
 }
