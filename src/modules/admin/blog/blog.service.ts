@@ -13,11 +13,24 @@ export class BlogService {
   constructor(private prisma: PrismaService) {}
 
   async create(ownerId: string, dto: CreateBlogDto) {
+    const category = await this.prisma.category.findUnique({
+      where: { id: dto.categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
     return await this.prisma.blog.create({
       data: {
         title: dto.title,
         content: dto.content,
+        location: dto.location,
+        categoryId: dto.categoryId,
         userId: ownerId,
+        heroImages: dto.heroImages
+          ? JSON.parse(JSON.stringify(dto.heroImages))
+          : null,
       },
     });
   }
