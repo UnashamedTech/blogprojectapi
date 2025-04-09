@@ -6,4 +6,7 @@ export class UpdateBlogDto {
 
   @IsString()
   content?: string;
+
+  @IsString()
+  location?: string;
 }
