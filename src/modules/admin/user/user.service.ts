@@ -14,11 +14,7 @@ export class UserService {
       take: limit,
       skip: (page - 1) * limit,
       include: {
-        RoleUser: {
-          include: {
-            Role: true,
-          },
-        },
+        Role: true,
       },
     });
   }
@@ -27,11 +23,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        RoleUser: {
-          include: {
-            Role: true,
-          },
-        },
+        Role: true,
       },
     });
 
@@ -62,8 +54,6 @@ export class UserService {
     await this.prisma.comment.deleteMany({ where: { userId: id } });
 
     await this.prisma.like.deleteMany({ where: { userId: id } });
-
-    await this.prisma.roleUser.deleteMany({ where: { userId: id } });
 
     await this.prisma.blog.deleteMany({ where: { userId: id } });
 
