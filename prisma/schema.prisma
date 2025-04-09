@@ -19,10 +19,6 @@ enum RoleType {
   USER
 }
 
-enum GenderType {
-  MALE
-  FEMALE
-}
 
 model User {
   id       String  @id @default(uuid())
@@ -30,29 +26,18 @@ model User {
   email    String  @unique
   password String
   imageUrl String?
+  roleId   String
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  RoleUser RoleUser[]
+  Role     Role    @relation(fields: [roleId], references: [id])
   blogs    Blog[]
   likes    Like[]
   comments Comment[]
 }
 
-model RoleUser {
-  id     String @id @default(uuid())
-  userId String
-  roleId String
-
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  User User @relation(fields: [userId], references: [id])
-  Role Role @relation(fields: [roleId], references: [id])
-}
 
 model Role {
   id        String   @id @default(uuid())
@@ -64,22 +49,48 @@ model Role {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  RoleUser RoleUser[]
+  users User[]
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  
+  blogs      Blog[]
+}
+
+model Information {
+  id           String   @id @default(uuid())
+  contactEmail String
+  contactPhone String
+  location     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
 }
 
 model Blog {
   id       String    @id @default(uuid())
   title    String
-  content  String
-  userId   String
-  comments Comment[]
-  likes    Like[]
+  userId    String
+  location   String
+  categoryId String 
+  heroImages Json?
+  content   Json?
+  
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   User User @relation(fields: [userId], references: [id])
+  Category Category @relation(fields: [categoryId], references: [id])
+  comments Comment[]
+  likes    Like[]
 }
 
 model Comment {
@@ -97,7 +108,7 @@ model Comment {
 
   Blog   Blog     @relation(fields: [blogId], references: [id])
   parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])
-  User   User     @relation(fields: [userId], references: [id]) // Add this line
+  User   User     @relation(fields: [userId], references: [id])
 }
 
 
@@ -118,3 +129,5 @@ model Like {
   @@unique([userId, blogId]) 
   @@unique([userId, commentId]) 
 }
+
+
