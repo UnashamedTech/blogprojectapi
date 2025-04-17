@@ -4,11 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class BlogService {
   constructor(private prisma: PrismaService) {}
@@ -22,16 +21,24 @@ export class BlogService {
       throw new NotFoundException('Category not found');
     }
 
+    // Transform each paragraph to ensure it has a generated ID
+    const transformedContent: Record<string, any> = {};
+    for (const [key, paragraph] of Object.entries(dto.content)) {
+      transformedContent[key] = {
+        id: uuidv4(), // Generate UUID for each paragraph
+        image: paragraph.image || null, // Optional image
+        content: paragraph.content,
+      };
+    }
+
     return await this.prisma.blog.create({
       data: {
         title: dto.title,
-        content: dto.content,
+        content: transformedContent,
         location: dto.location,
         categoryId: dto.categoryId,
         userId: ownerId,
-        heroImages: dto.heroImages
-          ? JSON.parse(JSON.stringify(dto.heroImages))
-          : null,
+        heroImages: dto.heroImages || null,
       },
     });
   }
@@ -83,10 +90,9 @@ export class BlogService {
       where: { id: blogId },
       data: {
         ...dto,
-        categoryId: dto.categoryId as never,
-        heroImages: dto.heroImages
-          ? (dto.heroImages as unknown as Prisma.InputJsonValue)
-          : null,
+        heroImages: dto.heroImages || null,
+        content: dto.content || undefined,
+        categoryId: dto.categoryId || undefined,
       },
     });
   }
