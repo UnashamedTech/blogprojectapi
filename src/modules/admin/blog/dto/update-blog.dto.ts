@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateBlogDto {
   @IsString()
@@ -9,4 +9,10 @@ export class UpdateBlogDto {
 
   @IsString()
   location?: string;
+
+  @IsString()
+  categoryId: string;
+
+  @IsOptional()
+  heroImages?: JSON;
 }
