@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -80,7 +81,13 @@ export class BlogService {
 
     return await this.prisma.blog.update({
       where: { id: blogId },
-      data: { ...dto },
+      data: {
+        ...dto,
+        categoryId: dto.categoryId as never,
+        heroImages: dto.heroImages
+          ? (dto.heroImages as unknown as Prisma.InputJsonValue)
+          : null,
+      },
     });
   }
 
