@@ -14,9 +14,10 @@ import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
 import { Roles } from 'src/modules/auth/auth.decorator';
 import { UserService } from './user.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
 
 @Controller('admin/user')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard)
 @Roles('OWNER')
 export class UserController {
   constructor(private readonly userService: UserService) {}
