@@ -2,9 +2,10 @@ import { Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { InteractionService } from './interaction.service';
 import { Roles } from 'src/modules/auth/auth.decorator';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
+import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
 
 @Controller('interaction')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard)
 @Roles('OWNER')
 export class InteractionController {
   constructor(private readonly interactionService: InteractionService) {}
