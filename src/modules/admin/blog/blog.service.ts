@@ -25,8 +25,8 @@ export class BlogService {
     const transformedContent: Record<string, any> = {};
     for (const [key, paragraph] of Object.entries(dto.content)) {
       transformedContent[key] = {
-        id: uuidv4(), // Generate UUID for each paragraph
-        image: paragraph.image || null, // Optional image
+        id: uuidv4(),
+        image: paragraph.image || null,
         content: paragraph.content,
       };
     }
