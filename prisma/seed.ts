@@ -48,8 +48,8 @@ async function seedInformation() {
   console.log('Seeding information...');
   await prisma.information.create({
     data: {
-      contactEmail: 'abcd@gmail.com',
-      contactPhone: '+251916272791',
+      contactEmail: 'jerihagbj@gmail.com',
+      contactPhone: '+251966830049',
       location: 'Addis Ababa, Ethiopia',
     },
   });
@@ -68,8 +68,10 @@ async function seedUsers() {
   const password = await bcrypt.hash('Password123#', 10);
 
   // Create Owner
-  const owner = await prisma.user.create({
-    data: {
+  const owner = await prisma.user.upsert({
+    where: { email: 'owner@example.com' },
+    update: {},
+    create: {
       name: 'Owner User',
       email: 'owner@example.com',
       password,
