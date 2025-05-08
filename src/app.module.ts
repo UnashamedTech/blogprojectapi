@@ -4,6 +4,10 @@ import { PrismaService } from './modules/prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './modules/admin/admin.module';
+import { InteractionModule } from './modules/interaction/interaction.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -17,6 +21,10 @@ import { AdminModule } from './modules/admin/admin.module';
     }),
     AuthModule,
     AdminModule,
+    BlogModule,
+    CommentModule,
+    InteractionModule,
+    ContactModule,
   ],
   providers: [PrismaService],
   controllers: [],
