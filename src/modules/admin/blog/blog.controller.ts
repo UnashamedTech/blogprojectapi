@@ -31,8 +31,13 @@ export class BlogController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.blogService.findAll(paginationDto);
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @Query('isDraft') isDraft?: string,
+  ) {
+    const draftFlag =
+      isDraft === 'true' ? true : isDraft === 'false' ? false : undefined;
+    return this.blogService.findAll(paginationDto, draftFlag);
   }
 
   @Get(':id')
