@@ -27,10 +27,10 @@ export class AuthController {
       await new Promise((r) => req.session.save(r));
       console.log('Stored blogId in session:', blogId);
     }
-    return passport.authenticate('google', { scope: ['profile', 'email'] })(
-      req,
-      res,
-    );
+    return passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      state: blogId,
+    })(req, res);
   }
 
   @Get('google/callback')
