@@ -81,7 +81,7 @@ model Blog {
   categoryId String 
   heroImages Json?
   content   Json?
-  
+  isDraft   Boolean  @default(false)
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())

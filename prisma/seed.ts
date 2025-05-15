@@ -111,6 +111,7 @@ async function seedBlogs(owner: any, categories: any[]) {
           userId: owner.id,
           location: faker.location.city(),
           categoryId: randomCategory.id,
+          isDraft: false,
           heroImages: {
             1: faker.image.url(),
             2: faker.image.url(),
