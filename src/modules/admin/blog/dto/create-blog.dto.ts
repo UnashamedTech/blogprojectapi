@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString, IsObject } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsObject,
+  IsBoolean,
+} from 'class-validator';
 
 type BlogParagraph = {
   id?: string;
@@ -25,4 +31,8 @@ export class CreateBlogDto {
   @IsOptional()
   @IsObject()
   heroImages?: Record<string, any>;
+
+  @IsOptional()
+  @IsBoolean()
+  isDraft?: boolean;
 }
