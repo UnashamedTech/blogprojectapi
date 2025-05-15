@@ -39,15 +39,19 @@ export class BlogService {
         categoryId: dto.categoryId,
         userId: ownerId,
         heroImages: dto.heroImages || null,
+        isDraft: dto.isDraft ?? false,
       },
     });
   }
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto, isDraft?: boolean) {
     const { page = 1, limit = 10 } = paginationDto;
+
+    const where = typeof isDraft === 'boolean' ? { isDraft } : {};
 
     const [blogs, total] = await this.prisma.$transaction([
       this.prisma.blog.findMany({
+        where,
         take: limit,
         skip: (page - 1) * limit,
         include: {
@@ -56,7 +60,7 @@ export class BlogService {
           likes: true,
         },
       }),
-      this.prisma.blog.count(),
+      this.prisma.blog.count({ where }),
     ]);
 
     return {
@@ -93,6 +97,9 @@ export class BlogService {
         heroImages: dto.heroImages || null,
         content: dto.content || undefined,
         categoryId: dto.categoryId || undefined,
+        isDraft: dto.isDraft ?? undefined,
+        title: dto.title || undefined,
+        location: dto.location || undefined,
       },
     });
   }
