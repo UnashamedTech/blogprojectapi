@@ -65,15 +65,15 @@ async function seedUsers() {
     where: { type: RoleType.USER },
   });
 
-  const password = await bcrypt.hash('Password123#', 10);
+  const password = await bcrypt.hash('Beti0909', 10);
 
   // Create Owner
   const owner = await prisma.user.upsert({
-    where: { email: 'owner@example.com' },
+    where: { email: 'bettyg.3170@gmail.com' },
     update: {},
     create: {
       name: 'Owner User',
-      email: 'owner@example.com',
+      email: 'bettyg.3170@gmail.com',
       password,
       imageUrl: faker.image.avatar(),
       roleId: ownerRole.id,
