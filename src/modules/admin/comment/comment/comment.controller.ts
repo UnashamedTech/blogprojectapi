@@ -9,10 +9,10 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { CommentService } from './comment.service';
 import { Roles } from 'src/modules/auth/auth.decorator';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
 import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
+import { CommentService } from 'src/modules/admin/comment/comment/comment.service';
 
 @Controller('comment')
 @UseGuards(AuthGuard, RoleGuard)
