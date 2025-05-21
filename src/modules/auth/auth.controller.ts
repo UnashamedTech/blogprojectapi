@@ -37,15 +37,26 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
     const token = req.user?.token;
+    const user = req.user?.user;
     const blogId = req.session.blogId || req.query.state;
     console.log('Retrieved blogId on callback:', blogId);
     if (!token) {
       return res.status(400).send('Token not found');
     }
 
-    const redirectUrl = `${process.env.WEB_CALLBACK_URL}/${encodeURIComponent(blogId)}?token=${token}`;
+    // Determine role from user data
+    const roles = user?.Role?.type ? [user.Role.type] : [];
 
-    res.redirect(redirectUrl);
+    let redirectUrl: string;
+    if (roles.includes('OWNER')) {
+      // Redirect OWNER to dashboard
+      redirectUrl = `${process.env.OWNER_DASHBOARD_URL}?token=${token}`;
+    } else {
+      // Redirect normal user to blog page
+      redirectUrl = `${process.env.WEB_CALLBACK_URL}/${encodeURIComponent(blogId)}?token=${token}`;
+    }
+
+    return res.redirect(redirectUrl);
   }
 
   @Post('sign-in')
