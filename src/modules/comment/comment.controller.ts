@@ -9,12 +9,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { CommentService } from './comment.service';
-import { Roles } from 'src/modules/auth/auth.decorator';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
-import { RoleGuard } from '../auth/guard/role/role.guard';
+import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
+import { Roles } from 'src/modules/auth/auth.decorator';
+import { CommentService } from 'src/modules/comment/comment.service';
 
-@Controller('comment')
+@Controller('comments')
 @UseGuards(AuthGuard, RoleGuard)
 @Roles('USER')
 export class CommentController {
@@ -25,7 +25,7 @@ export class CommentController {
     @Body('content') content: string,
     @Req() req,
   ) {
-    return this.commentService.createComment(req.user.id, blogId, content);
+    return this.commentService.createComment(req.user.sub, blogId, content);
   }
 
   @Post('reply/:commentId')
@@ -34,7 +34,7 @@ export class CommentController {
     @Body('content') content: string,
     @Req() req,
   ) {
-    return this.commentService.replyToComment(req.user.id, commentId, content);
+    return this.commentService.replyToComment(req.user.sub, commentId, content);
   }
   @Get('blog/:blogId')
   getComments(@Param('blogId') blogId: string) {
