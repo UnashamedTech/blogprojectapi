@@ -9,14 +9,30 @@ export class UserService {
 
   async findAllUsers(paginationDto: PaginationDto) {
     const { page = 1, limit = 10 } = paginationDto;
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        take,
+        skip,
+        include: {
+          Role: true,
+        },
+      }),
+      this.prisma.user.count(),
+    ]);
 
-    return this.prisma.user.findMany({
-      take: limit,
-      skip: (page - 1) * limit,
-      include: {
-        Role: true,
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
       },
-    });
+    };
   }
 
   async findOne(id: string) {
