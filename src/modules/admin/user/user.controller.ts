@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   ValidationPipe,
+  Post,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
@@ -21,6 +22,11 @@ import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
 @Roles('OWNER')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('invite')
+  async inviteUser(@Body() body: { name: string; email: string }) {
+    return this.userService.inviteUserByEmail(body.name, body.email);
+  }
 
   @Get('all')
   async findAll(
