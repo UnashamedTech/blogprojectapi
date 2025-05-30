@@ -2,10 +2,35 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
+
+  async inviteUserByEmail(name: string, email: string) {
+    const inviteLink = `https://blogprojectfrontend2.vercel.app`; // Customize the link
+    const subject = 'You are invited to read our latest blog!';
+    const message = `
+      Hi ${name},
+
+      You've been invited to read a new blog post from our platform.
+
+      Click the link below to view it:
+      ${inviteLink}
+
+      If you have any questions, feel free to reply to this email.
+
+      Best regards,
+      The Blog Team
+    `;
+
+    await this.mailService.sendInvitationEmail(email, subject, message);
+    return { message: `Invitation sent to ${email}` };
+  }
 
   async findAllUsers(paginationDto: PaginationDto) {
     const { page = 1, limit = 10 } = paginationDto;
