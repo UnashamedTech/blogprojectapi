@@ -50,4 +50,29 @@ export class MailService {
       throw new InternalServerErrorException('Could not send email');
     }
   }
+  async sendInvitationEmail(toEmail: string, subject: string, message: string) {
+    const transporter = nodemailer.createTransport({
+      host: this.config.get<string>('MAIL_HOST'),
+      port: this.config.get<number>('MAIL_PORT'),
+      secure: false,
+      auth: {
+        user: this.config.get<string>('MAIL_USER'),
+        pass: this.config.get<string>('MAIL_PASS'),
+      },
+    });
+
+    const mailOptions = {
+      from: this.config.get<string>('MAIL_FROM'),
+      to: toEmail,
+      subject,
+      text: message,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (err) {
+      console.error('Failed to send invitation email:', err);
+      throw new InternalServerErrorException('Could not send invitation email');
+    }
+  }
 }
