@@ -8,6 +8,7 @@ import {
   Res,
   Query,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { SignInUserDto } from './dto/sign-in-auth.dto';
 import { SignUpUserDto } from './dto/sign-up-auth.dto';
@@ -23,12 +24,25 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-async googleAuthRedirect(@Req() req, @Res() res) {
-  const jwt = req.user.token;       // <-- grab the string
-  res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${jwt}`);
+@Get('google/callback')
+@UseGuards(AuthGuard('google'))
+async googleAuthRedirect(
+  @Req() req: Request & { user: { token: string; user: any } },
+  @Res() res: Response
+) {
+  const { token, user } = req.user;
+  const roleType = user.Role?.type ??  'USER';                 
+
+  // pick your URL based on role
+  const target =
+    roleType === 'OWNER'
+      ? process.env.OWNER_DASHBOARD_URL
+      : process.env.WEB_CALLBACK_URL;
+
+  // finally redirect with JWT in query
+  res.redirect(`${target}?token=${encodeURIComponent(token)}`);
 }
+
 
   @Post('sign-in')
   async signIn(@Body() signInUserDto: SignInUserDto): Promise<AuthDto> {
