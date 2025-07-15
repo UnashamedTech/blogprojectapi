@@ -8,14 +8,12 @@ import {
   Res,
   Query,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { SignInUserDto } from './dto/sign-in-auth.dto';
 import { SignUpUserDto } from './dto/sign-up-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthDto } from './dto/auth.dto';
 import * as passport from 'passport';
-import { GoogleAuthGuard } from './guard/auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,29 +23,12 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
- @Get('google/callback')
-@UseGuards(GoogleAuthGuard)
-async googleAuthRedirect(
-  @Req() req: Request & { user: { token: string; user: any } },
-  @Res() res: Response
-) {
-  const { token, user } = req.user;
-  const from = (req.query.state as string) || null;
-
-  const roleType = user.Role?.type ?? 'USER';
-  const defaultTarget =
-    roleType === 'OWNER'
-      ? process.env.OWNER_DASHBOARD_URL
-      : process.env.WEB_CALLBACK_URL;
-
-  const finalUrl = from || defaultTarget;
-
-  return res.redirect(
-    `${finalUrl}?token=${encodeURIComponent(token)}`
-  );
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+async googleAuthRedirect(@Req() req, @Res() res) {
+  const jwt = req.user.token;       // <-- grab the string
+  res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${jwt}`);
 }
-
-
 
   @Post('sign-in')
   async signIn(@Body() signInUserDto: SignInUserDto): Promise<AuthDto> {
