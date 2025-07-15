@@ -15,6 +15,7 @@ import { SignUpUserDto } from './dto/sign-up-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthDto } from './dto/auth.dto';
 import * as passport from 'passport';
+import { GoogleAuthGuard } from './guard/auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -24,24 +25,30 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
-@Get('google/callback')
-@UseGuards(AuthGuard('google'))
-async googleAuthRedirect(
-  @Req() req: Request & { user: { token: string; user: any } },
-  @Res() res: Response
-) {
-  const { token, user } = req.user;
-  const roleType = user.Role?.type ??  'USER';                 
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthRedirect(
+    @Req()  req: Request & { user: { token: string; user: any } },
+    @Res()  res: Response
+  ) {
+    const { token, user } = req.user;
+    // 1) see if client asked for a special “from” in state
+    const from = (req.query.state as string) || null;
 
-  // pick your URL based on role
-  const target =
-    roleType === 'OWNER'
-      ? process.env.OWNER_DASHBOARD_URL
-      : process.env.WEB_CALLBACK_URL;
+    // 2) fallback to role‐based defaults
+    const roleType = user.Role?.type ?? 'USER';
+    const defaultTarget =
+      roleType === 'OWNER'
+        ? process.env.OWNER_DASHBOARD_URL
+        : process.env.WEB_CALLBACK_URL;
 
-  // finally redirect with JWT in query
-  res.redirect(`${target}?token=${encodeURIComponent(token)}`);
-}
+    const finalUrl = from ? from : defaultTarget;
+
+    // 3) do the final redirect
+    return res.redirect(
+      `${finalUrl}?token=${encodeURIComponent(token)}`
+    );
+  }
 
 
   @Post('sign-in')
