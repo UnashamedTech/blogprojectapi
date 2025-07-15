@@ -1,4 +1,4 @@
-// google-auth.guard.ts
+// google‑auth.guard.ts
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -7,10 +7,16 @@ export class GoogleAuthGuard extends AuthGuard('google') {
   getAuthenticateOptions(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
     const from = (req.query.from as string) || undefined;
+
     return {
-      // tell passport to include your “from” value in the OAuth state
+      // don’t use an Express session store
+      session: false,
+
+      // carry your “where to go next” in state
       state: from,
-      scope: ['profile','email'],
+
+      // re‑declare your scopes
+      scope: ['profile', 'email'],
     };
   }
 }

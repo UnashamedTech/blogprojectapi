@@ -25,30 +25,28 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
-  @Get('google/callback')
-  @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(
-    @Req()  req: Request & { user: { token: string; user: any } },
-    @Res()  res: Response
-  ) {
-    const { token, user } = req.user;
-    // 1) see if client asked for a special “from” in state
-    const from = (req.query.state as string) || null;
+ @Get('google/callback')
+@UseGuards(GoogleAuthGuard)
+async googleAuthRedirect(
+  @Req() req: Request & { user: { token: string; user: any } },
+  @Res() res: Response
+) {
+  const { token, user } = req.user;
+  const from = (req.query.state as string) || null;
 
-    // 2) fallback to role‐based defaults
-    const roleType = user.Role?.type ?? 'USER';
-    const defaultTarget =
-      roleType === 'OWNER'
-        ? process.env.OWNER_DASHBOARD_URL
-        : process.env.WEB_CALLBACK_URL;
+  const roleType = user.Role?.type ?? 'USER';
+  const defaultTarget =
+    roleType === 'OWNER'
+      ? process.env.OWNER_DASHBOARD_URL
+      : process.env.WEB_CALLBACK_URL;
 
-    const finalUrl = from ? from : defaultTarget;
+  const finalUrl = from || defaultTarget;
 
-    // 3) do the final redirect
-    return res.redirect(
-      `${finalUrl}?token=${encodeURIComponent(token)}`
-    );
-  }
+  return res.redirect(
+    `${finalUrl}?token=${encodeURIComponent(token)}`
+  );
+}
+
 
 
   @Post('sign-in')
