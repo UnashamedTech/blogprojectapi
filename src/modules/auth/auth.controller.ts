@@ -25,9 +25,10 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res) {
-     res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${req.user}`);
-  }
+async googleAuthRedirect(@Req() req, @Res() res) {
+  const jwt = req.user.token;       // <-- grab the string
+  res.redirect(`${process.env.WEB_CALLBACK_URL}?token=${jwt}`);
+}
 
   @Post('sign-in')
   async signIn(@Body() signInUserDto: SignInUserDto): Promise<AuthDto> {
