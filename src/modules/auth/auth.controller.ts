@@ -32,16 +32,11 @@ async googleAuthRedirect(@Req() req, @Res() res) {
     return res.status(400).send('Token not found');
   }
 
-  const roleType = user?.Role?.type ?? 'USER';
   let redirectUrl: string;
 
-  if (roleType === 'OWNER') {
-    // Owner → /admin?token=…
-    redirectUrl = `${process.env.OWNER_DASHBOARD_URL}?token=${encodeURIComponent(token)}`;
-  } else {
     // Normal user → /?token=…
     redirectUrl = `${process.env.WEB_CALLBACK_URL}?token=${encodeURIComponent(token)}`;
-  }
+  
 
   return res.redirect(redirectUrl);
 }
