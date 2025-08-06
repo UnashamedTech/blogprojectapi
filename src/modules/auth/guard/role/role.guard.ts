@@ -22,10 +22,10 @@ export class RoleGuard implements CanActivate {
     console.log('Required Roles:', requiredRoles);
     console.log('User:', user);
 
-    if (!user || !user.roles) {
+    if (!user || !user.role) {
       return false;
     }
 
-    return user.roles.some((role) => requiredRoles.includes(role));
+    return requiredRoles.includes(user.role);
   }
 }
