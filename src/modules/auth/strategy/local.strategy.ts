@@ -36,11 +36,16 @@ export class GoogleLocalStrategy extends PassportStrategy(
         imageUrl: photos[0].value,
       });
 
+      // Get user with role information
+      const userWithRole = await this.authService.getUserWithRoles(user.id);
+
       // Prepare JWT payload
       const payload = {
         sub: user.id,
         email: user.email,
         imageUrl: user.imageUrl,
+        name: user.name,
+        role: userWithRole.Role.type,
       };
 
       // Generate JWT token
