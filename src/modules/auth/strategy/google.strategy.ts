@@ -40,7 +40,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
       const userWithRoles = await this.authService.getUserWithRoles(user.id);
 
-      const roles = [userWithRoles.Role.type]; // Use Role directly
+      const role = userWithRoles.Role.type; // Use Role directly as string
 
       // Prepare JWT payload
       const payload = {
@@ -48,7 +48,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         email: user.email,
         imageUrl: user.imageUrl,
         name: user.name,
-        roles,
+        role,
       };
 
       // Generate JWT token
