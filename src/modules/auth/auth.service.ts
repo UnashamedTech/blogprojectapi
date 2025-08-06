@@ -30,13 +30,13 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
-    const roles = [user.Role.type];
+    const role = user.Role.type;
 
     const tokenPayload = {
       id: user.id,
       email: user.email,
       name: user.name,
-      roles,
+      role,
     };
 
     const token = await this.jwtService.signAsync(tokenPayload, {
@@ -54,12 +54,27 @@ export class AuthService {
     if (!user) {
       throw new Error('User not found');
     }
-    const token = await this.jwtService.signAsync(user, {
+    
+    // Get user with role information
+    const userWithRole = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { Role: true },
+    });
+
+    const tokenPayload = {
+      id: userWithRole.id,
+      email: userWithRole.email,
+      name: userWithRole.name,
+      role: userWithRole.Role.type,
+    };
+
+    const token = await this.jwtService.signAsync(tokenPayload, {
       secret: process.env.JWT_SECRET,
     });
+    
     return {
       token,
-      user: new UserDto(user),
+      user: new UserDto(userWithRole),
     };
   }
 
