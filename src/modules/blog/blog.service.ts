@@ -23,11 +23,13 @@ export class BlogService {
     ]);
 
     return {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
       data: blogs,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
