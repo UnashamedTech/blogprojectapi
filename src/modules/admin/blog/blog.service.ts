@@ -56,6 +56,7 @@ export class BlogService {
         skip: (page - 1) * limit,
         include: {
           User: true,
+          Category: true,
           comments: true,
           likes: true,
         },
@@ -77,7 +78,7 @@ export class BlogService {
   async findOne(id: string) {
     const blog = await this.prisma.blog.findUnique({
       where: { id },
-      include: { User: true, comments: true, likes: true },
+      include: { User: true, Category: true, comments: true, likes: true },
     });
     if (!blog) throw new NotFoundException('Blog not found');
     return blog;
