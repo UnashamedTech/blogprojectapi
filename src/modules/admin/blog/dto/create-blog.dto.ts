@@ -4,7 +4,9 @@ import {
   IsString,
   IsObject,
   IsBoolean,
+  IsIn,
 } from 'class-validator';
+import { BLOG_LAYOUTS } from 'src/common/constants/layout.constants';
 
 type BlogParagraph = {
   id?: string;
@@ -27,6 +29,15 @@ export class CreateBlogDto {
   @IsNotEmpty()
   @IsString()
   categoryId: string;
+
+  @IsOptional()
+  @IsString()
+  authorName?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(Object.values(BLOG_LAYOUTS))
+  layout?: string;
 
   @IsOptional()
   @IsObject()

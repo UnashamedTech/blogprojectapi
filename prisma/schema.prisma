@@ -79,6 +79,8 @@ model Blog {
   userId    String
   location   String
   categoryId String 
+  authorName String?
+  layout    String?
   heroImages Json?
   content   Json?
   isDraft   Boolean  @default(false)
