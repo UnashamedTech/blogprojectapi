@@ -2,13 +2,14 @@ import { Controller, Get, UseGuards, Post,
 Patch,
 Delete,
 Param,
-Body, ParseUUIDPipe,} from '@nestjs/common';
+Body, ParseUUIDPipe, Query, ValidationPipe,} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Roles } from 'src/modules/auth/auth.decorator';
 import { AuthGuard } from 'src/modules/auth/guard/auth/auth.guard';
 import { RoleGuard } from 'src/modules/auth/guard/role/role.guard';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('categories')
 @UseGuards(AuthGuard, RoleGuard)
@@ -17,8 +18,11 @@ export class CategoryController {
 constructor(private readonly categoryService: CategoryService) {}
 
 @Get()
-async getAllCategories() {
-return this.categoryService.findAll();
+async getAllCategories(
+  @Query(new ValidationPipe({ transform: true }))
+  paginationDto: PaginationDto,
+) {
+  return this.categoryService.findAll(paginationDto);
 }
 
 @Post()
